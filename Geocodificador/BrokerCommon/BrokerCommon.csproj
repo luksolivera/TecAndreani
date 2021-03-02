@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Silverback.Core" Version="2.2.0" />
+    <PackageReference Include="Silverback.Core.Model" Version="2.2.0" />
+    <PackageReference Include="Silverback.Integration.Kafka" Version="2.2.0" />
+  </ItemGroup>
+
+</Project>
