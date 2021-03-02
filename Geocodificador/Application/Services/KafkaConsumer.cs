@@ -2,6 +2,7 @@
 using BrokerCommon.Event;
 using MediatR;
 using Silverback.Messaging.Subscribers;
+using System;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -27,6 +28,7 @@ namespace Application.Services
                 Pais = data.Pais,
                 Provincia = data.Provincia
             });
+            
         }
     }
 }

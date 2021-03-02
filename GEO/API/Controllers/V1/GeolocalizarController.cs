@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 namespace API.Controllers.V1
 {
     [ApiController]
-    [ApiVersion("1")]
-    [Route("geolocalizar")]
     public class GeolocalizarController : ControllerBase
     {
         private readonly IApiRestPresenter _presenter;

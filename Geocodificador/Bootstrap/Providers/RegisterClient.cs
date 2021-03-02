@@ -13,13 +13,16 @@ namespace Bootstrap.Providers
 {
     public static class RegisterClient
     {
-        private const int retryCount = 3;
-        public static IServiceCollection AddAccountManagementApiClient(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddApiClient(this IServiceCollection services, IConfiguration configuration)
         {
-            var uri = configuration.GetValue<string>("OpenStreetMap:Uri");
+            var uri = configuration.GetSection("OpenStreetMap:Uri").Value;
 
             services.AddRefitClient<IOpenStreetMapClient>()
-               .ConfigureHttpClient(c => c.BaseAddress = new Uri(uri));
+               .ConfigureHttpClient(c => 
+               {
+                   c.BaseAddress = new Uri(uri);
+                   c.DefaultRequestHeaders.Add("User-Agent", "Refit");
+               });
 
 
             return services;

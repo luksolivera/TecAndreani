@@ -2,8 +2,11 @@
 using Domain.Errors;
 using Domain.Interface.Services;
 using MediatR;
+using Microsoft.Extensions.Configuration;
+using Refit;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -11,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Application.UseCase.V1.ConsumerGeolocalization
 {
-    public class Handler : IRequestHandler<Request, ApiResponse<bool>>
+    public class Handler : IRequestHandler<Request, Domain.Errors.ApiResponse<bool>>
     {
         private readonly IKafkaPublisher _publisher;
         private readonly IOpenStreetMapClient _client;
@@ -22,7 +25,7 @@ namespace Application.UseCase.V1.ConsumerGeolocalization
             _client = client;
         }
 
-        public async Task<ApiResponse<bool>> Handle(Request request, CancellationToken cancellationToken)
+        public async Task<Domain.Errors.ApiResponse<bool>> Handle(Request request, CancellationToken cancellationToken)
         {
             try
             {
@@ -31,16 +34,20 @@ namespace Application.UseCase.V1.ConsumerGeolocalization
 
                 if (response.IsSuccessStatusCode)
                 {
-                    await _publisher.PublishGeocodification(request.Id.ToString(), response.Content.Lat, response.Content.Lon);
+                    var content = response.Content.FirstOrDefault();
+                    if(content == null)
+                        await _publisher.PublishGeocodification(request.Id.ToString(), "","");
+                    else
+                        await _publisher.PublishGeocodification(request.Id.ToString(), content.Lat, content.Lon);
                 }
 
-                return new ApiResponse<bool>(true);
+                return new Domain.Errors.ApiResponse<bool>(true);
 
             }
             catch (Exception ex)
             {
                 request.AddNotification("Exception", $"Se ha lanzado una exception: {ex.Message}");
-                return new ApiResponse<bool>(request.Notifications, HttpStatusCode.UnprocessableEntity);
+                return new Domain.Errors.ApiResponse<bool>(request.Notifications, HttpStatusCode.UnprocessableEntity);
             }
 
 
@@ -48,12 +55,12 @@ namespace Application.UseCase.V1.ConsumerGeolocalization
         private string BuildQuery(Request request)
         {
             var q = new StringBuilder();
-            q.Append($"{request.Calle},");
-            q.Append($"{request.Numero},");
-            q.Append($"{request.Codigo_Postal},");
-            q.Append($"{request.Cuidad},");
-            q.Append($"{request.Provincia},");
-            q.Append($"{request.Pais},");
+            q.Append($"{request.Calle.Replace(' ', '+')},");
+            q.Append($"{request.Numero.Replace(' ', '+')},");
+            q.Append($"{request.Codigo_Postal.Replace(' ', '+')},");
+            q.Append($"{request.Cuidad.Replace(' ', '+')},");
+            q.Append($"{request.Provincia.Replace(' ', '+')},");
+            q.Append($"{request.Pais.Replace(' ', '+')}");
 
             return q.ToString();
         }

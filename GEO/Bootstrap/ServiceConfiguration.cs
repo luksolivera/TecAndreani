@@ -9,7 +9,7 @@ namespace Bootstrap
         public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSwagger();
-            services.AddMalditoApiVersioning();
+            //services.AddMalditoApiVersioning();
             services.AddMediatr();
             services.ConfigurePersistenceServices(configuration);
             services.AddQuerys();

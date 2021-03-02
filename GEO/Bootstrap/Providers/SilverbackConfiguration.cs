@@ -1,4 +1,5 @@
-﻿using BrokerCommon.Event;
+﻿using Application.Services;
+using BrokerCommon.Event;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,12 +17,15 @@ namespace Bootstrap.Providers
             .WithConnectionToMessageBroker(options => options
                 .AddKafka()
                 .AddInboundConnector()
-                .AddOutboundConnector());
+                .AddOutboundConnector())
+            .UseModel()
+            .AddScopedSubscriber<KafkaConsumer>();
             return services;
         }
         public static IApplicationBuilder SilverbackConfigure(this IApplicationBuilder app, BusConfigurator busConfigurator, IConfiguration configuration)
         {
             var uri = configuration.GetSection("KafkaConfiguration:Uri").Value;
+            var maxFailedAttempts = 3;
             var ConfigurationConsumer = new KafkaConsumerConfig
             {
                 BootstrapServers = uri,
@@ -36,7 +40,15 @@ namespace Bootstrap.Providers
                     new KafkaConsumerEndpoint("geocodification")
                     {
                         Configuration = ConfigurationConsumer
-                    })
+                    }, policy => policy.Chain(
+                                    policy.Move(new KafkaProducerEndpoint("retry_5M_topic") { Configuration = new KafkaProducerConfig { BootstrapServers = configuration["Kafka:Uri"] } })
+                                      .MaxFailedAttempts(maxFailedAttempts),
+                                    policy.Move(new KafkaProducerEndpoint("retry_30M_topic") { Configuration = new KafkaProducerConfig { BootstrapServers = configuration["Kafka:Uri"] } })
+                                      .MaxFailedAttempts(maxFailedAttempts),
+                                    policy.Move(new KafkaProducerEndpoint("retry_60M_topic") { Configuration = new KafkaProducerConfig { BootstrapServers = configuration["Kafka:Uri"] } })
+                                      .MaxFailedAttempts(maxFailedAttempts),
+                                    policy.Move(new KafkaProducerEndpoint("failed_topic") { Configuration = new KafkaProducerConfig { BootstrapServers = configuration["Kafka:Uri"] } })
+                                      .MaxFailedAttempts(maxFailedAttempts)))
                 .AddOutbound<GeolocalizacionEvent>(
                     new KafkaProducerEndpoint("create-geolocalization")
                     {

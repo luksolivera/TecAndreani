@@ -52,7 +52,7 @@ namespace Persistance.Queries
                     SELECT {nameof(Geolocalizacion)}.{nameof(Geolocalizacion.Id)},
                             {nameof(Geolocalizacion)}.{nameof(Geolocalizacion.Latitud)},
                             {nameof(Geolocalizacion)}.{nameof(Geolocalizacion.Longuitud)},
-                            {nameof(Estado)}.{nameof(Estado.Descripcion)}
+                            {nameof(Estado)}.{nameof(Estado.Descripcion)} AS {nameof(GeocodificarQueryDto.Estado)}
                     FROM {nameof(Geolocalizacion)}
                     INNER JOIN {nameof(Estado)} on {nameof(Estado)}.{nameof(Estado.EstadoId)} = {nameof(Geolocalizacion)}.{nameof(Geolocalizacion.EstadoId)}
                     WHERE {nameof(Geolocalizacion.Id)} = @id

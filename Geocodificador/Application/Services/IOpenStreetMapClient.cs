@@ -1,7 +1,5 @@
 ﻿using Refit;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -9,7 +7,7 @@ namespace Application.Services
     public interface IOpenStreetMapClient
     {
         [Get("/search")]
-        Task<ApiResponse<GetGelocationResponse>> GetGelocation([Query] string q, [Query] string format = "json");
+        Task<ApiResponse<List<GetGelocationResponse>>> GetGelocation(string q, [Query] string format = "json", [Query] string limit = "1");
     }
 
     public class GetGelocationResponse

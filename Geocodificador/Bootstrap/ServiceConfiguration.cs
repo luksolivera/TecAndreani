@@ -16,6 +16,7 @@ namespace Bootstrap
             services.AddCommands();
             services.AddServices();
             services.AddSilverbackConfigure();
+            services.AddApiClient(configuration);
             return services;
         }
 
